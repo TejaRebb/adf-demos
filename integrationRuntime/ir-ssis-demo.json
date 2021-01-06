@@ -1,0 +1,27 @@
+{
+	"name": "ir-ssis-demo",
+	"properties": {
+		"type": "Managed",
+		"typeProperties": {
+			"computeProperties": {
+				"location": "East US",
+				"nodeSize": "Standard_D2_v3",
+				"numberOfNodes": 1,
+				"maxParallelExecutionsPerNode": 7
+			},
+			"ssisProperties": {
+				"catalogInfo": {
+					"catalogServerEndpoint": "ssisirdemo.database.windows.net",
+					"catalogAdminUserName": "ssisirdemo",
+					"catalogAdminPassword": {
+						"type": "SecureString",
+						"value": "**********"
+					},
+					"catalogPricingTier": "Basic"
+				},
+				"edition": "Standard",
+				"licenseType": "LicenseIncluded"
+			}
+		}
+	}
+}

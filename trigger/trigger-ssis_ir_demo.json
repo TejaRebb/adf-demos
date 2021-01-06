@@ -1,0 +1,24 @@
+{
+	"name": "trigger-ssis_ir_demo",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "SSIS IR Demo",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Minute",
+				"interval": 1,
+				"startTime": "2021-01-03T16:09:00Z",
+				"timeZone": "UTC"
+			}
+		}
+	}
+}
