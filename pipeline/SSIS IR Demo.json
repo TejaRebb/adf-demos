@@ -29,6 +29,7 @@
 			},
 			{
 				"name": "Start SSIS IR if not in Started state",
+				"description": "added new description",
 				"type": "IfCondition",
 				"dependsOn": [
 					{
