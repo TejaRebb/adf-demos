@@ -1,0 +1,18 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "adf-jan-2020"
+		},
+		"ir-ssis-demo_properties_typeProperties_ssisProperties_catalogInfo_catalogServerEndpoint": {
+			"value": "ssisirdemo.database.windows.net"
+		},
+		"ir-ssis-demo_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminUserName": {
+			"value": "ssisirdemo"
+		},
+		"ir-ssis-demo_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
+			"value": ""
+		}
+	}
+}

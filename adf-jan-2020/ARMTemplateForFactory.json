@@ -1,0 +1,427 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "adf-jan-2020"
+		},
+		"ir-ssis-demo_properties_typeProperties_ssisProperties_catalogInfo_catalogServerEndpoint": {
+			"type": "string",
+			"defaultValue": "ssisirdemo.database.windows.net"
+		},
+		"ir-ssis-demo_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminUserName": {
+			"type": "string",
+			"defaultValue": "ssisirdemo"
+		},
+		"ir-ssis-demo_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
+			"type": "secureString"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/SSIS IR Demo')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Get the SSIS IR status",
+						"description": "Call REST API to start Azure-SSIS IR.",
+						"type": "WebActivity",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"url": "https://management.azure.com/subscriptions/94321c57-8a21-4280-8245-6f7655746ac2/resourceGroups/adf-demos/providers/Microsoft.DataFactory/factories/adf-jan-2020/integrationRuntimes/ir-ssis-demo?api-version=2018-06-01",
+							"method": "GET",
+							"headers": {},
+							"body": {
+								"message": "Start my IR"
+							},
+							"authentication": {
+								"type": "MSI",
+								"resource": "https://management.azure.com"
+							}
+						}
+					},
+					{
+						"name": "Start SSIS IR if not in Started state",
+						"description": "added new description",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "vSSISIRStatus",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@equals(activity('Get the SSIS IR status').output.properties.state,'Started')",
+								"type": "Expression"
+							},
+							"ifFalseActivities": [
+								{
+									"name": "Start Azure-SSIS IR",
+									"description": "Call REST API to start Azure-SSIS IR.",
+									"type": "WebActivity",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"url": "https://management.azure.com/subscriptions/94321c57-8a21-4280-8245-6f7655746ac2/resourcegroups/adf-demos/providers/Microsoft.DataFactory/factories/adf-jan-2020/integrationRuntimes/ir-ssis-demo/start?api-version=2018-06-01",
+										"method": "POST",
+										"headers": {},
+										"body": {
+											"message": "Start my IR"
+										},
+										"authentication": {
+											"type": "MSI",
+											"resource": "https://management.azure.com"
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "vSSISIRStatus",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Get the SSIS IR status",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "vSSISIRStatus",
+							"value": {
+								"value": "@activity('Get the SSIS IR status').output.properties.state",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"variables": {
+					"vSSISIRStatus": {
+						"type": "String",
+						"defaultValue": "Stopped"
+					}
+				},
+				"annotations": [],
+				"lastPublishTime": "2021-01-03T16:26:32Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Stop SSIS IR')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Get the SSIS IR status",
+						"description": "Call REST API to start Azure-SSIS IR.",
+						"type": "WebActivity",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"url": "https://management.azure.com/subscriptions/94321c57-8a21-4280-8245-6f7655746ac2/resourceGroups/adf-demos/providers/Microsoft.DataFactory/factories/adf-jan-2020/integrationRuntimes/ir-ssis-demo?api-version=2018-06-01",
+							"connectVia": {
+								"referenceName": "Azure-IR-EastUS",
+								"type": "IntegrationRuntimeReference"
+							},
+							"method": "GET",
+							"headers": {},
+							"body": {
+								"message": "Start my IR"
+							},
+							"authentication": {
+								"type": "MSI",
+								"resource": "https://management.azure.com"
+							}
+						}
+					},
+					{
+						"name": "vSSISIRStatus",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Get the SSIS IR status",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "vSSIS-IR-Status",
+							"value": {
+								"value": "@activity('Get the SSIS IR status').output.properties.state",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Stop SSIS IR",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "vSSISIRStatus",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "Get current pipeline runs",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@not(\n  or(  \n     equals( variables('vSSIS-IR-Status'), 'Initial' ),\n     equals( variables('vSSIS-IR-Status'), 'Stopped' )\n  )\n)",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "Stop Azure-SSIS IR",
+									"description": "Call REST API to stop Azure-SSIS IR.",
+									"type": "WebActivity",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"url": "https://management.azure.com/subscriptions/94321c57-8a21-4280-8245-6f7655746ac2/resourcegroups/adf-demos/providers/Microsoft.DataFactory/factories/adf-jan-2020/integrationRuntimes/ir-ssis-demo/stop?api-version=2018-06-01",
+										"connectVia": {
+											"referenceName": "Azure-IR-EastUS",
+											"type": "IntegrationRuntimeReference"
+										},
+										"method": "POST",
+										"headers": {},
+										"body": {
+											"message": "Stop my IR"
+										},
+										"authentication": {
+											"type": "MSI",
+											"resource": "https://management.azure.com"
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Get current pipeline runs",
+						"description": "Call REST API to start Azure-SSIS IR.",
+						"type": "WebActivity",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"url": "https://management.azure.com/subscriptions/94321c57-8a21-4280-8245-6f7655746ac2/resourceGroups/adf-demos/providers/Microsoft.DataFactory/factories/adf-jan-2020/queryPipelineRuns?api-version=2018-06-01",
+							"connectVia": {
+								"referenceName": "Azure-IR-EastUS",
+								"type": "IntegrationRuntimeReference"
+							},
+							"method": "POST",
+							"headers": {},
+							"body": {
+								"message": "Start my IR"
+							},
+							"authentication": {
+								"type": "MSI",
+								"resource": "https://management.azure.com"
+							}
+						}
+					}
+				],
+				"variables": {
+					"vSSIS-IR-Status": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"lastPublishTime": "2021-01-03T18:19:32Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/Azure-IR-EastUS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Wait 2 mins')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Wait for 2 mins",
+						"type": "Wait",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"waitTimeInSeconds": 120
+						}
+					}
+				],
+				"annotations": [],
+				"lastPublishTime": "2021-01-03T17:51:09Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/trigger-ssis_ir_demo')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "SSIS IR Demo",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Minute",
+						"interval": 1,
+						"startTime": "2021-01-03T16:09:00Z",
+						"timeZone": "UTC"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/SSIS IR Demo')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/trigger-stop_ssis_ir')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipeline": {
+					"pipelineReference": {
+						"referenceName": "Stop SSIS IR",
+						"type": "PipelineReference"
+					},
+					"parameters": {}
+				},
+				"type": "TumblingWindowTrigger",
+				"typeProperties": {
+					"frequency": "Hour",
+					"interval": 1,
+					"startTime": "2021-01-03T16:26:00Z",
+					"delay": "00:00:00",
+					"maxConcurrency": 1,
+					"retryPolicy": {
+						"count": 1,
+						"intervalInSeconds": 30
+					},
+					"dependsOn": []
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/Stop SSIS IR')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Azure-IR-EastUS')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "Managed",
+				"typeProperties": {
+					"computeProperties": {
+						"location": "East US",
+						"dataFlowProperties": {
+							"computeType": "General",
+							"coreCount": 8,
+							"timeToLive": 10
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ir-ssis-demo')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "Managed",
+				"typeProperties": {
+					"computeProperties": {
+						"location": "East US",
+						"nodeSize": "Standard_D2_v3",
+						"numberOfNodes": 1,
+						"maxParallelExecutionsPerNode": 7
+					},
+					"ssisProperties": {
+						"catalogInfo": {
+							"catalogServerEndpoint": "[parameters('ir-ssis-demo_properties_typeProperties_ssisProperties_catalogInfo_catalogServerEndpoint')]",
+							"catalogAdminUserName": "[parameters('ir-ssis-demo_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminUserName')]",
+							"catalogAdminPassword": {
+								"type": "SecureString",
+								"value": "[parameters('ir-ssis-demo_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword')]"
+							},
+							"catalogPricingTier": "Basic"
+						},
+						"edition": "Standard",
+						"licenseType": "LicenseIncluded"
+					}
+				}
+			},
+			"dependsOn": []
+		}
+	]
+}
