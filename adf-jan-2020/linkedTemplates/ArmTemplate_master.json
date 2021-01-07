@@ -18,6 +18,10 @@
 		"ir-ssis-demo_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
 			"type": "secureString"
 		},
+		"ls_akv_msdata_properties_typeProperties_baseUrl": {
+			"type": "string",
+			"defaultValue": "https://kv-msdata.vault.azure.net/"
+		},
 		"containerUri": {
 			"type": "string",
 			"metadata": "URI to storage account containing linked ARM templates"
@@ -53,6 +57,9 @@
 					},
 					"ir-ssis-demo_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
 						"value": "[parameters('ir-ssis-demo_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword')]"
+					},
+					"ls_akv_msdata_properties_typeProperties_baseUrl": {
+						"value": "[parameters('ls_akv_msdata_properties_typeProperties_baseUrl')]"
 					}
 				}
 			},

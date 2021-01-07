@@ -17,6 +17,10 @@
 		},
 		"ir-ssis-demo_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
 			"type": "secureString"
+		},
+		"ls_akv_msdata_properties_typeProperties_baseUrl": {
+			"type": "string",
+			"defaultValue": "https://kv-msdata.vault.azure.net/"
 		}
 	},
 	"variables": {
@@ -201,6 +205,19 @@
 						"edition": "Standard",
 						"licenseType": "LicenseIncluded"
 					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ls_akv_msdata')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureKeyVault",
+				"typeProperties": {
+					"baseUrl": "[parameters('ls_akv_msdata_properties_typeProperties_baseUrl')]"
 				}
 			},
 			"dependsOn": []
